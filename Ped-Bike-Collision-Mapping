@@ -1,0 +1,43 @@
+#Dataset found at https://data.montgomerycountymd.gov/Public-Safety/Crash-Reporting-Incidents-Data/bhju-22kf/about_data
+
+#Import Libraries
+import pandas as pd
+import datetime
+import requests
+import numpy as np
+import plotly.express as px
+
+
+#Grabbing the dataset
+df=pd.read_csv('Crash_Reporting_-_Incidents_Data_20240111.csv') 
+df=pd.DataFrame(df)
+
+#Identifying collisions of interest
+victims = ['OTHER PEDALCYCLE', 'PEDESTRIAN', 'BICYCLE']
+
+#Creating index
+index  = np.arange(len(df))
+
+#Filtering index by collisions of interest
+harm1 = index[df["First Harmful Event"].isin(victims)]
+harm2 = index[df["Second Harmful Event"].isin(victims)]
+harm_index=np.union1d(harm1,harm2)
+
+#Creating new Data Frame
+Location = df.loc[harm_index,['Latitude','Longitude','Crash Date/Time']]
+
+#Plotting data as heatmap
+
+fig = px.density_mapbox(Location, lat="Latitude", lon="Longitude", hover_name="Crash Date/Time", radius =10,
+                         zoom=12, height=500)
+fig.update_layout(mapbox_style="open-street-map")
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+fig.show()
+
+#Plotting data as scattermap
+
+fig = px.scatter_mapbox(Location, lat="Latitude", lon="Longitude", hover_name="Crash Date/Time", 
+                         color_discrete_sequence=["red"],zoom=10, height=500)
+fig.update_layout(mapbox_style="open-street-map")
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+fig.show()
